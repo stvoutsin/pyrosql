@@ -33,7 +33,7 @@ class Table(object):
         """  
         rowcount = -1        
         try:
-            rowcount = self.count(data)
+            rowcount = len(self.data)
         except Exception as e:
             logging.exception(e) 
                
