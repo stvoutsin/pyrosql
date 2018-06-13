@@ -7,9 +7,10 @@ import logging
 from astropy.table import Table as astropy_Table
 
 
-class Table(Object):
+class Table(object):
     """
-    classdocs
+    Table class, contains methods for accessing data for astronomy use (i.e. get as Astropy Table
+
     """
 
 
@@ -30,16 +31,16 @@ class Table(Object):
         rowcount: integer
             Count of rows  
         """  
-        rowcount = None        
+        rowcount = -1        
         try:
-            rowcount = count(data)
+            rowcount = self.count(data)
         except Exception as e:
             logging.exception(e) 
                
         return rowcount
     
     
-    def as_astropy (self, limit=True):
+    def as_astropy (self, limit=False):
         """Get Astropy table
                              
         Returns
@@ -51,7 +52,7 @@ class Table(Object):
             if (self.count()>self.maxrows):
                 raise Exception ("Max row limit exceeded")
             else :
-                return astropy_Table.read()
+                return astropy_Table(self.data)
         else:
-            return astropy_Table.read()        
+            return astropy_Table(self.data)        
  

@@ -19,6 +19,7 @@ from time import gmtime,  strftime
 import logging
 import datetime
 from .db_helper import DBHelper
+from .table import Table
 
 def ResultIter(cursor, arraysize=100000):
     'An iterator that uses fetchmany to keep memory usage down'
@@ -54,26 +55,32 @@ class PyroSQL(object):
         self.dbport = dbport
         self.driver = driver
         
-    def _getRows(self, query_result):
+
+    def _get_rows(self, query_result):
         '''
         Get rows from a query result array
         
         :param query_result:
         '''
-        row_length = -1
+        row_length = None
         if len(query_result)>=2:
             row_length = len(query_result[1])    
         return row_length
    
+
     def execute_sql_query(self, query, database, limit=None, timeout=None):
         '''
         Execute an SQL query
         
         @param query: The SQL Query
         @param database: The Database
+        @param limit: limit (rows)
+        @param database: timeout
         '''
-        return self._execute_query(query, database, limit, timeout)
-    
+        mydb = DBHelper(self.dbserver, self.dbuser, self.dbpasswd, self.dbport, self.driver)
+        table_data = mydb.execute_query_multiple_rows(query, database, limit, timeout)
+        return Table(table_data)
+            
     
     def execute_update(self, query, database):
         '''
@@ -86,41 +93,7 @@ class PyroSQL(object):
         response = mydb.execute_update(query, database)
         return response
         
-        
-    def execute_sql_query_get_rows(self, query, database, limit=None, timeout=None):
-        '''
-        Execute an SQL query
-        
-        @param query: The SQL Query
-        @param database: The Database
-        '''
-        file_path=''
-        now = datetime.datetime.now()
-        query_results=[]
-        cols = []
-        rows = -1
-        datatable=[]
-        error_code = -1
-        
-        dthandler = lambda obj: (
-            obj.isoformat()
-            if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date) else None)
-        
- 
-        try:
-            query_results = self._execute_query_get_cols_rows(query,database, limit, timeout)
-        except pyodbc.ProgrammingError as err:
-            error_message = repr(err)
-            logging.exception(err)
-            return (-1, error_message)
-        except Exception as e:
-            logging.exception(e)
-            if (type(e).__name__=="Timeout"):
-                raise e
 
-
-        return (self._getRows(query_results), "")
-    
     def execute_insert (self, qry, database, params):
         '''
         Execute an insert query (qry) against a db 
@@ -133,29 +106,6 @@ class PyroSQL(object):
         res = mydb.execute_insert(qry, database, params)
         return res
     
-
-    def _execute_query (self, qry, database, limit=None, timeout=None):
-        '''
-        Execute a query (qry) against a db and table
-        
-        :param qry:
-        :param database:        
-        '''
-        mydb = DBHelper(self.dbserver, self.dbuser, self.dbpasswd, self.dbport, self.driver)
-        table_data = mydb.execute_query_multiple_rows(qry, database, limit, timeout)
-        return table_data
-        
-        
-    def _execute_query_get_cols_rows (self,qry, database, limit=None, timeout=None):
-        '''
-        Execute a query (qry) against a db and table, the information of which is stored as global variables
-        
-        :param qry:
-        :param database:
-        '''
-        mydb = DBHelper(self.dbserver,self.dbuser ,self.dbpasswd, self.dbport, self.driver)
-        table_data = mydb.execute_query_get_cols_rows(qry, database, limit, timeout)
-        return table_data        
 
     def execute_query_empty (self, qry, database, limit=None, timeout=None):
         '''
