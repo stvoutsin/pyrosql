@@ -36,6 +36,7 @@ class DBHelper:
         self.port = port
         self.driver = driver
         
+
     def execute_qry_single_row (self, query, db_name):
         '''
         Execute a query on a database & table, that will return a single row
@@ -103,10 +104,11 @@ class DBHelper:
         '''
         Execute a query on a database & table that may return any number of rows
         '''
-        return_val = []
-       
+
+       	columns = []
+        rows = []
         params = 'DRIVER={' + self.driver + '};SERVER=' + self.db_server + ';Database=' + db_name +';UID=' + self.username + ';PWD=' + self.password +';TDS_Version=8.0;Port='  + self.port + ';'
-        print (params)
+
         cnxn = pyodbc.connect(params)  
 
         if timeout!=None:
@@ -119,19 +121,13 @@ class DBHelper:
                 columns = [column[0] for column in cursor.description]
             else:
                 columns=[]
-            return_val.append(columns)
-            rowlist=[]
+
 
             if (limit!=None):
                 rows = cursor.fetchmany(limit)
             else :
                 rows = cursor.fetchall()
 
-
-            for row in rows:
-                rowlist.append(dict(zip(columns, row)))
-            
-            return_val.append(rowlist) 
             cnxn.close()
 
         except Exception as e:
@@ -139,7 +135,7 @@ class DBHelper:
             #cnxn.close()
             raise e
             
-        return return_val
+        return [columns,rows]
 
 
     def execute_insert (self, insert_query, db_name, query_parameters):           

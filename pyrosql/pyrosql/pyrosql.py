@@ -78,8 +78,8 @@ class PyroSQL(object):
         @param database: timeout
         '''
         mydb = DBHelper(self.dbserver, self.dbuser, self.dbpasswd, self.dbport, self.driver)
-        table_data = mydb.execute_query_multiple_rows(query, database, limit, timeout)
-        return Table(table_data)
+        table_data = mydb.execute_query_get_cols_rows(query, database, limit, timeout)
+        return Table(table_data[1], table_data[0])
             
     
     def execute_update(self, query, database):

@@ -14,11 +14,12 @@ class Table(object):
     """
 
 
-    def __init__(self, data, maxrows=100000000):
+    def __init__(self, data, columns, maxrows=100000000):
         """
         Constructor
         """ 
         self.data = data
+        self.columns = columns
         self.maxrows = maxrows
         return
 
@@ -52,7 +53,7 @@ class Table(object):
             if (self.count()>self.maxrows):
                 raise Exception ("Max row limit exceeded")
             else :
-                return astropy_Table(self.data)
+                return astropy_Table(rows=self.data, names=self.columns)
         else:
-            return astropy_Table(self.data)        
+            return astropy_Table(rows=self.data, names=self.columns)        
  
